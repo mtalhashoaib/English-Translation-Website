@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "English Word-by-Word Translator",
-  "version": "2.1.0",
-  "description": "Translate English on any web page line by line and word by word into Chinese, German, French, Russian, Arabic or Persian, with Roman pronunciation.",
+  "version": "2.2.0",
+  "description": "Translate English on any web page line by line and word by word into Chinese, Japanese, Korean, German, French, Dutch, Swedish, Norwegian, Danish, Russian, Arabic, Persian or Urdu, with Roman pronunciation.",
   "action": {
     "default_popup": "popup.html",
     "default_title": "English Word-by-Word Translator"

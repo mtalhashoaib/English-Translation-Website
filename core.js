@@ -1,7 +1,7 @@
 // English Word-by-Word Translator
 // Translation + transliteration come from Google's public translate endpoint (dt=t & dt=rm).
-// French and German have no transliteration from the API, so a rule-based
-// English-style respelling is generated locally (approximate).
+// French, German, Dutch, Swedish, Norwegian and Danish have no transliteration
+// from the API, so a rule-based English-style respelling is generated locally (approximate).
 
 const LANGS = {
   "zh-CN": { speech: "zh-CN", rtl: false },
@@ -10,6 +10,13 @@ const LANGS = {
   ru: { speech: "ru-RU", rtl: false },
   ar: { speech: "ar-SA", rtl: true },
   fa: { speech: "fa-IR", rtl: true },
+  ur: { speech: "ur-PK", rtl: true },
+  ja: { speech: "ja-JP", rtl: false },
+  ko: { speech: "ko-KR", rtl: false },
+  nl: { speech: "nl-NL", rtl: false, respell: respellDutch },
+  sv: { speech: "sv-SE", rtl: false, respell: respellSwedish },
+  no: { speech: "nb-NO", rtl: false, respell: respellNorwegian },
+  da: { speech: "da-DK", rtl: false, respell: respellDanish },
 };
 
 const cache = new Map();
@@ -114,3 +121,60 @@ function respellGerman(text) {
     .join("");
 }
 
+// Shared helper: respell each word, keeping spaces and punctuation
+function respellEach(text, fn) {
+  return text
+    .toLowerCase()
+    .split(/(\s+)/)
+    .map((w) => {
+      if (!w.trim()) return w;
+      const core = w.replace(/[.,!?;:"()«»„“”]/g, "");
+      const punct = w.slice(core.length);
+      return fn(core) + punct;
+    })
+    .join("");
+}
+
+function respellDutch(text) {
+  const map = {
+    sch: "s-kh", ij: "ay", ei: "ay", ui: "ow", oe: "oo", eu: "er", ou: "ow", au: "ow",
+    aa: "ah", ee: "ay", oo: "oh", uu: "ew", ch: "kh", g: "kh", sj: "sh", tj: "ch",
+    j: "y", w: "v", v: "v", ck: "k", "é": "ay", "ë": "eh", "ï": "ee",
+  };
+  return respellEach(text, (core) => replaceByMap(core.replace(/en$/, "uh"), map));
+}
+
+function respellSwedish(text) {
+  const map = {
+    stj: "sh", skj: "sh", sj: "sh", tj: "ch", kj: "ch", ck: "k", j: "y",
+    "å": "aw", "ä": "eh", "ö": "er", y: "ew", u: "oo", w: "v",
+  };
+  return respellEach(text, (core) => {
+    core = core.replace(/sk(?=[eiyäö])/g, "sh").replace(/(?<!c)k(?=[eiyäö])/g, "ch").replace(/g(?=[eiyäö])/g, "y");
+    return replaceByMap(core, map);
+  });
+}
+
+function respellNorwegian(text) {
+  const map = {
+    skj: "sh", sj: "sh", kj: "ch", tj: "ch", hj: "y", gj: "y", hv: "v",
+    "øy": "oy", ei: "ay", au: "ow", ck: "k", j: "y",
+    "å": "aw", "æ": "eh", "ø": "er", y: "ew", w: "v",
+  };
+  return respellEach(text, (core) => {
+    core = core.replace(/sk(?=[eiyøæ])/g, "sh").replace(/(?<!c)k(?=[iy])/g, "ch").replace(/g(?=[iyøæ])/g, "y");
+    return replaceByMap(core, map);
+  });
+}
+
+// Danish pronunciation is very irregular; this is only a rough guide.
+function respellDanish(text) {
+  const map = {
+    sj: "sh", hv: "v", ej: "eye", ei: "eye", "øj": "oy", "øe": "oy", aa: "aw",
+    "å": "aw", "æ": "eh", "ø": "er", y: "ew", u: "oo", j: "y", w: "v", ck: "k",
+  };
+  return respellEach(text, (core) => {
+    core = core.replace(/(?<=[aeiouyæøå])d(?![a-zæøå])/g, "dh").replace(/(?<=[aeiouyæøå])g$/g, "");
+    return replaceByMap(core, map);
+  });
+}

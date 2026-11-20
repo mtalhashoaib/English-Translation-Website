@@ -4,9 +4,9 @@
   window.__ewtLoaded = true;
 
   const DEFAULTS = { enabled: false, mode: "select", lang: "zh-CN", roman: true };
-  const SPEECH = { "zh-CN": "zh-CN", de: "de-DE", fr: "fr-FR", ru: "ru-RU", ar: "ar-SA", fa: "fa-IR" };
-  const NAMES = { "zh-CN": "Chinese", de: "German", fr: "French", ru: "Russian", ar: "Arabic", fa: "Persian" };
-  const RTL = { ar: true, fa: true };
+  const SPEECH = { "zh-CN": "zh-CN", de: "de-DE", fr: "fr-FR", ru: "ru-RU", ar: "ar-SA", fa: "fa-IR", ur: "ur-PK", ja: "ja-JP", ko: "ko-KR", nl: "nl-NL", sv: "sv-SE", no: "nb-NO", da: "da-DK" };
+  const NAMES = { "zh-CN": "Chinese", de: "German", fr: "French", ru: "Russian", ar: "Arabic", fa: "Persian", ur: "Urdu", ja: "Japanese", ko: "Korean", nl: "Dutch", sv: "Swedish", no: "Norwegian", da: "Danish" };
+  const RTL = { ar: true, fa: true, ur: true };
   const SKIP_SEL = 'script,style,noscript,textarea,input,select,option,code,pre,svg,canvas,iframe,kbd,[contenteditable=""],[contenteditable="true"],.ewt-wrap,.ewt-line,[data-ewt-host]';
   const WORD_RE = /[A-Za-z][A-Za-z'’]*(?:-[A-Za-z][A-Za-z'’]*)*/g;
 
