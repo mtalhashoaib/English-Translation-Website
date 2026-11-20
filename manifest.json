@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "English Word-by-Word Translator",
+  "version": "2.1.0",
+  "description": "Translate English on any web page line by line and word by word into Chinese, German, French, Russian, Arabic or Persian, with Roman pronunciation.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "English Word-by-Word Translator"
+  },
+  "background": { "service_worker": "background.js" },
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+* { box-sizing: border-box; }
+body {
+  width: 540px; min-height: 300px; max-height: 600px; overflow-y: auto;
+  margin: 0; padding: 14px; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #1c1c1e; background: #fafaf8;
+}
+h1 { font-size: 17px; margin: 0; }
+.sub { margin: 2px 0 12px; color: #6b6b70; font-size: 12px; }
+.row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.row label { font-weight: 600; font-size: 12px; }
+select, textarea, button {
+  font: inherit; border: 1px solid #cfcfd4; border-radius: 8px; background: #fff;
+}
+select { flex: 1; padding: 6px 8px; }
+textarea { width: 100%; padding: 8px; resize: vertical; margin-bottom: 10px; }
+button { padding: 6px 12px; cursor: pointer; }
+button:hover { background: #f0f0f2; }
+button.primary { background: #c96442; color: #fff; border-color: #c96442; font-weight: 600; }
+button.primary:hover { background: #b5573a; }
+button:disabled { opacity: .55; cursor: default; }
+.buttons { flex-wrap: wrap; }
+.check { margin-left: auto; font-weight: 500 !important; display: flex; align-items: center; gap: 4px; }
+#status { min-height: 18px; font-size: 12px; color: #6b6b70; margin-bottom: 6px; }
+#status.err { color: #b3261e; }
+
+.line-card {
+  background: #fff; border: 1px solid #e3e3e6; border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 10px;
+}
+.line-en { font-size: 13px; color: #55555a; margin-bottom: 6px; }
+.line-tr { font-size: 20px; font-weight: 600; }
+.line-ro { font-size: 14px; color: #c96442; font-style: italic; margin: 2px 0 8px; }
+.line-head { display: flex; align-items: flex-start; gap: 8px; }
+.line-head > div { flex: 1; }
+.speak { padding: 2px 8px; font-size: 14px; }
+.rtl { direction: rtl; text-align: right; }
+
+.words { display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px dashed #e3e3e6; padding-top: 8px; }
+.chip {
+  display: flex; flex-direction: column; align-items: center; min-width: 56px;
+  background: #f5f4f0; border-radius: 8px; padding: 5px 8px; text-align: center;
+}
+.chip .en { font-size: 11px; color: #6b6b70; }
+.chip .tr { font-size: 16px; font-weight: 600; }
+.chip .ro { font-size: 12px; color: #c96442; font-style: italic; }
+.chip.loading .tr { color: #aaa; }
+.hide-roman .ro, .hide-roman .line-ro { display: none; }
+footer { margin-top: 8px; font-size: 11px; color: #8a8a8f; }
+
+.switchbox { background: #fff; border: 1px solid #e3e3e6; border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; }
+.switchbox .big { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+.switchbox .row { margin-bottom: 0; }
