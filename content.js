@@ -20,17 +20,31 @@
     const key = tl + "|" + text.toLowerCase();
     if (cache.has(key)) return cache.get(key);
     const p = new Promise((resolve) => {
-      if (!alive()) return resolve({ t: "?", r: "" });
+      if (!alive()) return resolve({ t: "?", r: "", err: "Extension was reloaded, refresh this page" });
+      let done = false;
+      const finish = (v) => { if (!done) { done = true; clearTimeout(timer); resolve(v); } };
+      const timer = setTimeout(() => finish({ t: "?", r: "", err: "Timed out waiting for translator" }), 60000);
       try {
         chrome.runtime.sendMessage({ type: "translate", text, tl }, (res) => {
-          void chrome.runtime.lastError;
-          resolve(res && res.ok ? res : { t: "?", r: "" });
+          const le = chrome.runtime.lastError;
+          if (res && res.ok) finish(res);
+          else finish({ t: "?", r: "", err: (res && res.error) || (le && le.message) || "No response from background" });
         });
-      } catch (e) { resolve({ t: "?", r: "" }); }
+      } catch (e) { finish({ t: "?", r: "", err: String(e) }); }
     });
     p.then((r) => { if (r.t === "?") cache.delete(key); });
     cache.set(key, p);
     return p;
+  }
+
+  // Fill a node with a translation; on failure show the reason on hover and retry automatically
+  function fill(text, tl, apply, tries = 0) {
+    tr(text, tl).then((res) => {
+      apply(res);
+      if (res.t === "?" && tries < 3 && alive()) {
+        setTimeout(() => fill(text, tl, apply, tries + 1), 5000 * (tries + 1));
+      }
+    });
   }
 
   function speak(text, tl) {
@@ -64,7 +78,7 @@
     if (RTL[tl]) t.setAttribute("dir", "rtl");
     const r = mk("span", "ewt-ro", "");
     w.append(en, t, r);
-    tr(word, tl).then((res) => { t.textContent = res.t; r.textContent = res.r; });
+    fill(word, tl, (res) => { t.textContent = res.t; r.textContent = res.r; t.title = res.err || ""; });
     return w;
   }
 
@@ -136,7 +150,7 @@
         }
         host.insertBefore(line, ref);
         lineEls.push(line);
-        tr(text, tl).then((res) => { t.textContent = res.t; r.textContent = res.r; });
+        fill(text, tl, (res) => { t.textContent = res.t; r.textContent = res.r; t.title = res.err || ""; });
       }
     }
   }
@@ -273,7 +287,7 @@
       const spk = mk("button", "spk", "🔊");
       head.append(box, spk);
       card.appendChild(head);
-      tr(line, tl).then((res) => { t.textContent = res.t; r.textContent = res.r; spk.onclick = () => speak(res.t, tl); });
+      fill(line, tl, (res) => { t.textContent = res.t; r.textContent = res.r; t.title = res.err || ""; spk.onclick = () => speak(res.t, tl); });
 
       const words = mk("div", "words");
       const uniq = [];
@@ -288,7 +302,7 @@
         const cr = mk("span", "r", "");
         chip.append(mk("span", "e", w), ct, cr);
         words.appendChild(chip);
-        tr(w, tl).then((res) => { ct.textContent = res.t; cr.textContent = res.r; chip.onclick = () => speak(res.t, tl); });
+        fill(w, tl, (res) => { ct.textContent = res.t; cr.textContent = res.r; ct.title = res.err || ""; chip.onclick = () => speak(res.t, tl); });
       }
       card.appendChild(words);
       panel.appendChild(card);
@@ -321,8 +335,9 @@
     chrome.storage.local.get(DEFAULTS, (v) => { st = Object.assign({}, DEFAULTS, v); apply(); });
     chrome.storage.onChanged.addListener((ch, area) => {
       if (area !== "local" || !alive()) return;
-      for (const k in ch) st[k] = ch[k].newValue;
-      apply();
+      let touched = false;
+      for (const k in ch) if (k in DEFAULTS) { st[k] = ch[k].newValue; touched = true; }
+      if (touched) apply();
     });
   }
 })();

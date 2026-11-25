@@ -1,4 +1,4 @@
-# English Word-by-Word Translator (Chrome / Edge extension) v2.2
+# English Word-by-Word Translator (Chrome / Edge extension) v2.3
 
 Translates English **on any web page** (Google, news sites, Wikipedia...) line by line and word by word
 into one language at a time. Supported languages:
@@ -54,8 +54,8 @@ leaves your browser is the English text you ask it to translate, and it goes to 
 
 **What is stored**
 - Four settings are saved locally in your browser: on/off, mode, language and the Roman on/off choice.
-- Translations are cached in memory only to avoid repeat requests. The cache is cleared when the page is
-  closed or the browser stops the extension. Nothing is written to disk and no history is kept.
+- Translated words and lines are cached locally in the browser (up to a few thousand entries) so repeat
+  requests are avoided. This stores English snippets you translated, nothing about the pages you visit.
 - Nothing is stored about the pages you visit, and no page text is kept after translation.
 
 **Permissions, and why**

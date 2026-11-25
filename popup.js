@@ -126,3 +126,51 @@ chrome.storage.local.get({ enabled: false, mode: "select", lang: "zh-CN", roman:
 $("enabled").addEventListener("change", (e) => chrome.storage.local.set({ enabled: e.target.checked }));
 $("mode").addEventListener("change", (e) => chrome.storage.local.set({ mode: e.target.value }));
 $("lang").addEventListener("change", (e) => chrome.storage.local.set({ lang: e.target.value }));
+
+
+// ---------- diagnostics ----------
+const DIAG_HOSTS = ["<all_urls>", "https://translate.googleapis.com/*", "https://translate.google.com/*", "https://api.mymemory.translated.net/*"];
+
+async function probe(label, url) {
+  const t0 = Date.now();
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    const body = (await res.text()).slice(0, 110).replace(/\s+/g, " ");
+    return label + ": HTTP " + res.status + " (" + (Date.now() - t0) + " ms) " + body;
+  } catch (e) {
+    return label + ": FAILED  " + e.name + ": " + e.message;
+  } finally { clearTimeout(timer); }
+}
+
+async function runDiag() {
+  const box = $("diag");
+  box.textContent = "Running…";
+  const out = ["Version " + chrome.runtime.getManifest().version, "Online: " + navigator.onLine, ""];
+  for (const h of DIAG_HOSTS) {
+    try { out.push("Permission " + h + ": " + (await chrome.permissions.contains({ origins: [h] }))); }
+    catch (e) { out.push("Permission " + h + ": error " + e.message); }
+  }
+  const denied = out.some((l) => /^Permission .*: false$/.test(l));
+  if (denied) out.push("", "! Site access is withheld. Open chrome://extensions > this extension > Details > Site access > \"On all sites\", or click Grant access.");
+  out.push("");
+  out.push(await probe("Google (googleapis)", "https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=de&dt=t&q=hello"));
+  out.push(await probe("Google (translate.google.com)", "https://translate.google.com/translate_a/single?client=gtx&sl=en&tl=de&dt=t&q=hello"));
+  out.push(await probe("Microsoft (auth)", "https://edge.microsoft.com/translate/auth"));
+  out.push(await probe("Lingva", "https://lingva.ml/api/v1/en/de/hello"));
+  out.push(await probe("MyMemory fallback", "https://api.mymemory.translated.net/get?q=hello&langpair=en|de"));
+  box.textContent = out.join("\n");
+}
+
+$("diagRun").addEventListener("click", runDiag);
+$("diagGrant").addEventListener("click", async () => {
+  try {
+    const ok = await chrome.permissions.request({ origins: DIAG_HOSTS });
+    setStatus(ok ? "Access granted. Reload the page you are translating." : "Access was not granted.", !ok);
+  } catch (e) { setStatus("Could not request access: " + e.message, true); }
+  runDiag();
+});
+$("diagCopy").addEventListener("click", () => {
+  navigator.clipboard.writeText($("diag").textContent).then(() => setStatus("Diagnostics copied."), () => setStatus("Select the text and copy it manually.", true));
+});
